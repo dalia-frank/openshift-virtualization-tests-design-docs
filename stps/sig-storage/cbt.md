@@ -105,16 +105,16 @@ technology, and testability before formal test planning.
 
 | Environment Component                         | Configuration | Specification Examples                                                                        |
 |:----------------------------------------------|:--------------|:----------------------------------------------------------------------------------------------|
-| **Cluster Topology**                          |               | [e.g., 3-master/3-worker bare-metal, SNO, Compact Cluster, HCP]                               |
-| **OCP & OpenShift Virtualization Version(s)** |               | [e.g., OCP 4.20 with OpenShift Virtualization 4.20]                                          |
-| **CPU Virtualization**                        |               | [e.g., Nodes with VT-x (Intel) or AMD-V (AMD) enabled in BIOS]                                |
-| **Compute Resources**                         |               | [e.g., Minimum per worker node: 8 vCPUs, 32GB RAM]                                           |
-| **Special Hardware**                          |               | [e.g., Specific NICs for SR-IOV, GPU etc]                                                    |
-| **Storage**                                   |               | [e.g., Minimum 500GB per node, specific StorageClass(es)]                                    |
-| **Network**                                   |               | [e.g., OVN-Kubernetes (default), Secondary Networks, Network Plugins, IPv4, IPv6, dual-stack] |
-| **Required Operators**                        |               | [e.g., NMState Operator]                                                                      |
-| **Platform**                                  |               | [e.g., Bare metal, AWS, Azure, GCP etc]                                                      |
-| **Special Configurations**                    |               | [e.g., Disconnected/air-gapped cluster, Proxy environment, FIPS mode enabled]                |
+| **Cluster Topology**                          |               | Standard.                                                                                     |
+| **OCP & OpenShift Virtualization Version(s)** |               | OCP 4.21 with OpenShift Virtualization (CNV). For storage-provider path, updated KubeVirt images as provided. |
+| **CPU Virtualization**                        |               | Standard.                                                                                     |
+| **Compute Resources**                         |               | Standard.                                                                                     |
+| **Special Hardware**                          |               | Standard.                                                                                     |
+| **Storage**                                   |               | Standard. CBT is storage-agnostic. Any StorageClass for VMs and PVCs; sufficient capacity for backup PVCs. |
+| **Network**                                   |               | Standard.                                                                                     |
+| **Required Operators**                        |               | Standard. OpenShift Virtualization (CNV).                                                     |
+| **Platform**                                  |               | Standard.                                                                                     |
+| **Special Configurations**                    |               | For OCP 4.21: use updated KubeVirt images as provided to storage providers.                  |
 
 #### **3.1. Testing Tools & Frameworks**
 
@@ -130,35 +130,34 @@ The following conditions must be met before testing can begin:
 
 - [x] Requirements and design documents are **approved and merged**
 - [x] Test environment can be **set up and configured** (see Section II.3 - Test Environment)
-- [x] [Add feature-specific entry criteria as needed]
+- [x] IncrementalBackup feature gate enabled (when applicable)
 
 #### **5. Risks**
 
 | Risk Category        | Specific Risk for This Feature                                                                                 | Mitigation Strategy                                                                            | Status |
 |:---------------------|:---------------------------------------------------------------------------------------------------------------|:-----------------------------------------------------------------------------------------------|:-------|
-| Timeline/Schedule    | [Describe your specific timeline risk]                                                                        | [Your specific mitigation]                                                                     | [x]    |
-| Test Coverage        | [Describe coverage gaps]                                                                                       | [Your mitigation]                                                                             | [x]    |
-| Test Environment     | [Describe environment risks]                                                                                   | [Your mitigation]                                                                              | [x]    |
-| Untestable Aspects   | [List what cannot be tested]                                                                                   | [Your mitigation]                                                                             | [x]    |
-| Resource Constraints | [Describe resource issues]                                                                                     | [Your mitigation]                                                                              | [x]    |
-| Dependencies         | [Describe dependency risks]                                                                                    | [Your mitigation]                                                                              | [x]    |
-| Other                | [Any other specific risks]                                                                                     | [Mitigation strategy]                                                                          | [x]    |
+| Timeline/Schedule    | Feature code still under development. Testing may be blocked or delayed until implementation stabilizes.       | Start with basic testing (push backup). Prioritize P0 goals. Align with dev milestones. Debug quarantined tests in parallel. | [x]    |
+| Test Coverage        | Tier 1 tests run upstream but are quarantined downstream (failing, need debug). Coverage gap until re-enabled. | Run and maintain tests upstream. Debug downstream failures. Re-enable when stable.             | [x]    |
+| Test Environment     | OCP 4.21 path requires updated KubeVirt images.                                                                 | Code to update KubeVirt already shared with storage providers. They can validate backup (push mode). | [x]    |
+| Untestable Aspects   | None identified.                                                                                               | N/A                                                                                            | [x]    |
+| Resource Constraints | Limited QE capacity; feature spans multiple areas (CBT, backup, 4.21 path).                                    | Focus on P0 and P1. Automate where possible.                                                   | [x]    |
+| Dependencies         | Feature code and API still in progress. Storage providers unblocked via shared image-update code.             | Track dev deliverables. Support storage providers with documentation and image guidance.      | [x]    |
+| Other                | T1 tests quarantined downstream until failures are debugged.                                                     | Debug and fix. Re-enable when green.                                                           | [x]    |
 
 #### **6. Known Limitations**
 
-- [List limitation 1]
-- [List limitation 2]
+- Testing can start with current scope (e.g. upstream, P0/P1 focus). Not all tests are active yet: Tier 1 tests are quarantined downstream until failures are debugged.
+- Feature code and API are still under development. Storage providers can already validate backup (push mode) on OCP 4.21 using the shared KubeVirt image-update code.
 
 ---
 
 ### **III. Test Scenarios & Traceability**
 
+To be filled from Jira (epic CNV-61530). Map requirement IDs to test scenarios and align with Testing Goals (Section II.1).
+
 | Requirement ID    | Requirement Summary   | Test Scenario(s)                                           | Tier   | Priority |
 |:------------------|:----------------------|:-----------------------------------------------------------|:-------|:---------|
-| [Jira-123]        | As a user...          | Verify VM can be created with new feature X                | Tier 1 | P0       |
-| [Jira-124]        | As an admin...        | Verify API for feature X is backward compatible            | Tier 2 | P0       |
-| [Jira-125]        | NFR-2 (Security)      | Verify feature X follows RBAC permissions model            | ...    | P1       |
-| [Jira-126]        | As a cluster admin... | Verify upgrade from version X to Y preserves feature state | ....   | P2       |
+| TBD               | TBD                   | TBD                                                        | TBD    | TBD      |
 
 ---
 

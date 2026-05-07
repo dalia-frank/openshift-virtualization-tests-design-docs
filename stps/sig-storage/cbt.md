@@ -188,7 +188,7 @@ This Software Test Plan requires approval from the following stakeholders:
 
 * **Reviewers:**
   - Development Representative (OCP-V): [Adi Aloni](@Acedus), [Alvaro Romero](@alromeros)
-  - QE Members (OCP-V): [Emanuele Aliberti](@ema-aka-young), [Kateryna Shvaika](@kshvaika), [Jose Macassan](@josemacassan), [Ahmad Hafez](@Ahmad-Hafe), [Jenia Peimer](@jpeimer)
+  - QE Members (OCP-V): [Emanuele Prella](@ema-aka-young), [Kateryna Shvaika](@kshvaika), [Jose Manuel Castano](@josemacassan), [Ahmad Hafe](@Ahmad-Hafe), [Jenia Peimer](@jpeimer)
 * **Approvers:**
   - QE Architect (OCP-V): [Ruth Netser](@rnetser)
   - QE Member (OCP-V): [Jenia Peimer](@jpeimer)

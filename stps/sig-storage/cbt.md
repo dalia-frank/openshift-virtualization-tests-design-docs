@@ -61,22 +61,22 @@ CBT (Changed Block Tracking) enables storage-agnostic incremental backup of VMs,
 
 **Testing Goals**
 
-- **[P0]** Verify CBT enable/disable and VM/VMI status.
-- **[P0]** Verify push-mode full backup completes and backup integrity can be validated.
-- **[P0]** Verify incremental backup with VirtualMachineBackupTracker (full then incremental).
-- **[P0]** Verify CBT on OCP 4.22 with HCO feature gate for CBT enabled.
-- **[P1]** Verify full and incremental backup with Windows VM.
-- **[P1]** Verify ForceFullBackup when tracker has checkpoint.
-- **[P1]** Verify behavior when backup PVC is full or insufficient (error returned, no partial backup).
-- **[P1]** Verify backup on different StorageClasses with different capabilities (RWO/RWX, block/filesystem).
-- **[P1]** Verify pull-mode backup.
-- **[P1]** Verify pull-mode backup internal tunnel security (virt-exportserver to virt-launcher transport requires client certificates, HTTP CONNECT without certificate fails).
-- **[P1]** Verify concurrent backups (5-10 simultaneous backups) complete successfully without errors or corruption.
-- **[P2]** Verify checkpoint redefinition after VM restart. Full backup fallback after crash/corrupted bitmap.
-- **[P2]** Verify backup with hotplugged disks.
-- **[P2]** Verify incremental backup after migration.
-- **[P2]** Verify qcow2 overlay migration with RWO and RWX backend PVCs (bitmap behavior).
-- **[P2]** Verify migration and backup are mutually exclusive.
+- **[P0]** As a cluster admin, I want to enable changed-block tracking on a VM so that incremental backups are available.
+- **[P0]** As a cluster admin, I want to perform a full backup in push mode and validate its integrity.
+- **[P0]** As a cluster admin, I want to perform incremental backups that save only changed blocks since the last backup.
+- **[P0]** As a cluster admin, I want CBT functionality to be available when the feature gate is enabled.
+- **[P1]** As a cluster admin, I want to perform full and incremental backups with Windows VMs.
+- **[P1]** As a backup admin, I want to force a full backup even after previous backups.
+- **[P1]** As a cluster admin, I want to receive an error when backup storage is full or insufficient so that no partial backup is created.
+- **[P1]** As a cluster admin, I want to perform backups on different storage types.
+- **[P1]** As a backup vendor, I want to perform backups in pull mode so that I can control where backup data is stored.
+- **[P1]** As a cluster admin, I want pull-mode backups to be secure.
+- **[P1]** As a cluster admin, I want to run concurrent backups on different VMs without errors or corruption.
+- **[P2]** As a cluster admin, I want backups to recover correctly after VM restart or failures.
+- **[P2]** As a cluster admin, I want to back up hotplugged disks so that all VM storage is protected.
+- **[P2]** As a cluster admin, I want to perform incremental backups after migration to minimize backup storage and time.
+- **[P2]** As a cluster admin, I want migration to preserve backup checkpoints.
+- **[P2]** As a cluster admin, I want backup and migration operations to be mutually exclusive to ensure data integrity.
 
 **Out of Scope (Testing Scope Exclusions)**
 
@@ -163,22 +163,22 @@ Scenarios below trace to Jira epic [CNV-61530](https://issues.redhat.com/browse/
 
 | Requirement ID   | Requirement Summary | Test Scenario(s) | Tier | Priority |
 |:-----------------|:--------------------|:------------------|:-----|:---------|
-| CNV-61530 (epic) | CBT enable/disable and VM/VMI status | Enable CBT on VM, verify VM/VMI status. Disable CBT, verify behavior and status. | T1 | P0 |
-|                  | Push-mode full backup and integrity | Run full backup in push mode to user PVC. Validate backup integrity (e.g. restore verification). | T1 | P0 |
-|                  | Incremental backup with VirtualMachineBackupTracker | Create backup tracker, run full backup then incremental backup. Verify only changed blocks. | T1 | P0 |
-|                  | Full and incremental backup with Windows VM | Run full then incremental backup for Windows VM. Validate backup and integrity. | T3 | P1 |
-|                  | CBT on OCP 4.22 with HCO feature gate | Verify CBT flows on OCP 4.22 with HCO feature gate for CBT enabled. | T2 | P0 |
-|                  | ForceFullBackup when tracker has checkpoint | With existing tracker/checkpoint, trigger ForceFullBackup. Verify full backup is produced. | T1 | P1 |
-|                  | Backup when PVC is full or insufficient | Use full or too-small backup PVC. Verify error returned and no partial backup. | T1 | P1 |
-|                  | Backup on different StorageClasses | Run backup with RWO/RWX and block/filesystem StorageClasses. Verify success and behavior. | T1 | P1 |
-|                  | Pull-mode backup | Run backup in pull mode with scratch PVC. Verify completion and integrity using the **VMExport API** (HTTP shim to the underlying NBD export). (Merged for 4.22.) | T2 | P1 |
-|                  | Pull-mode backup internal tunnel security | Verify that the internal transport between virt-exportserver and virt-launcher requires client certificates. Attempt HTTP CONNECT without certificate and verify it fails. Only authenticated connections with proper certificates should succeed. | T1 | P1 |
-|                  | Concurrent backups | Run 5-10 simultaneous backups (mix of full and incremental). Verify all complete successfully without errors or corruption. | T2 | P1 |
-|                  | Checkpoint redefinition after VM restart, full backup fallback | After VM restart, verify checkpoint redefinition. After crash/corrupted bitmap, verify full backup fallback. Checkpoint behavior after **qcow2 overlay migration** with **RWO** and **RWX** backend PVCs. | T2 | P2 |
-|                  | Backup with hotplugged disks | Hotplug one or more disks to a running VM with CBT enabled. Run full then incremental backup. Verify hotplugged disks are included in backup scope and incremental behavior is correct. | T2 | P2 |
-|                  | Incremental backup after migration | Migrate the VM (live or cold per test design). After migration completes, run incremental backup against the prior checkpoint/tracker state. Verify incremental backup succeeds and captures post-migration changes with both **RWO** and **RWX** backend PVCs for **qcow2 overlay migration**. | T2 | P2 |
-|                  | Overlay migration with RWO and RWX backend PVCs | Run **qcow2 overlay migration** with VM disk on RWO backend PVC, and with RWX. Verify bitmap behavior and proper bitmap migration for both access modes. | T2 | P2 |
-|                  | Migration and backup mutually exclusive | Start backup, attempt migration (or vice versa). Verify they are mutually exclusive. | T1 | P2 |
+| CNV-61530 (epic) | As a cluster admin, I want to enable changed-block tracking on a VM so that incremental backups are available | Enable CBT on a VM, confirm status reflects the change. Disable CBT, confirm status updates and backup behavior adjusts. | T1 | P0 |
+|                  | As a cluster admin, I want to perform a full backup in push mode and validate its integrity | Run a full backup in push mode to a PVC. Validate backup integrity. | T1 | P0 |
+|                  | As a cluster admin, I want to perform incremental backups that save only changed blocks since the last backup | Create a backup tracker, run a full backup then an incremental backup. Confirm only changed blocks are saved. | T1 | P0 |
+|                  | As a cluster admin, I want CBT functionality to be available when the feature gate is enabled | Perform CBT operations on OCP 4.22 with the HCO feature gate for CBT enabled. Confirm functionality works as expected. | T2 | P0 |
+|                  | As a cluster admin, I want to perform full and incremental backups with Windows VMs | Run a full backup followed by an incremental backup for a Windows VM. Validate backup and integrity. | T3 | P1 |
+|                  | As a backup admin, I want to force a full backup even after previous backups | With an existing tracker and checkpoint, trigger a forced full backup. Confirm a full backup is produced. | T1 | P1 |
+|                  | As a cluster admin, I want to receive an error when backup storage is full or insufficient so that no partial backup is created | Use a full or too-small backup PVC. Confirm an error is returned and no partial backup exists. | T1 | P1 |
+|                  | As a cluster admin, I want to perform backups on different storage types | Run backups with different StorageClasses (RWO/RWX, block/filesystem). Confirm successful completion. | T1 | P1 |
+|                  | As a backup vendor, I want to perform backups in pull mode so that I can control where backup data is stored | Run a backup in pull mode with a scratch PVC. Confirm the backup completes and integrity can be validated by pulling data from the exposed endpoint. | T2 | P1 |
+|                  | As a cluster admin, I want pull-mode backups to be secure | Confirm that the internal transport requires client certificates. Attempt HTTP CONNECT without a certificate and verify it fails. Only authenticated connections should succeed. | T1 | P1 |
+|                  | As a cluster admin, I want to run concurrent backups on different VMs without errors or corruption | Run 5-10 simultaneous backups on different VMs (mix of full and incremental). Confirm all complete successfully without errors or corruption. | T2 | P1 |
+|                  | As a cluster admin, I want backups to recover correctly after VM restart or failures | After VM restart, confirm checkpoints are redefined. After a crash or corrupted bitmap, confirm a full backup fallback occurs. Verify checkpoint behavior after migration with RWO and RWX backend PVCs. | T2 | P2 |
+|                  | As a cluster admin, I want to back up hotplugged disks so that all VM storage is protected | Hotplug one or more disks to a running VM with CBT enabled. Run a full backup then an incremental backup. Confirm hotplugged disks are included and incremental behavior is correct. | T2 | P2 |
+|                  | As a cluster admin, I want to perform incremental backups after migration to minimize backup storage and time | Migrate a VM. After migration completes, run an incremental backup. Confirm the incremental backup succeeds and captures post-migration changes with both RWO and RWX backend PVCs. | T2 | P2 |
+|                  | As a cluster admin, I want migration to preserve backup checkpoints | Perform migration with VM disks on RWO backend PVC, and with RWX. Confirm bitmap behavior and proper bitmap preservation for both access modes. | T2 | P2 |
+|                  | As a cluster admin, I want backup and migration operations to be mutually exclusive to ensure data integrity | Start a backup and attempt migration (or vice versa). Confirm they are mutually exclusive. | T1 | P2 |
 
 ---
 
